@@ -1,7 +1,21 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
+import { v2 as cloudinary } from "cloudinary";
 import path from "path";
 import fs from "fs";
+
+// Configure Cloudinary using env variables if present
+if (
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -14,17 +28,40 @@ export async function POST(request: Request) {
 
     const urls: string[] = [];
 
-    // Check if Vercel Blob Token is set. If so, use Vercel Blob.
+    // Check configuration priority: Cloudinary -> Vercel Blob -> Local
+    const hasCloudinary = !!(
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+    );
     const hasBlobToken = !!process.env.BLOB_READ_WRITE_TOKEN;
 
-    if (hasBlobToken) {
+    if (hasCloudinary) {
+      // Option 1: Cloudinary upload
       for (const file of files) {
-        // Upload to Vercel Blob
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        
+        // Convert buffer to data URI to upload via Cloudinary SDK
+        const mime = file.type || "image/jpeg";
+        const base64Data = buffer.toString("base64");
+        const fileUri = `data:${mime};base64,${base64Data}`;
+
+        const uploadResult = await cloudinary.uploader.upload(fileUri, {
+          folder: "inmobiliaria_uploads",
+          resource_type: "auto", // Automatically detects image vs video
+        });
+
+        urls.push(uploadResult.secure_url);
+      }
+    } else if (hasBlobToken) {
+      // Option 2: Vercel Blob upload
+      for (const file of files) {
         const blob = await put(file.name, file, { access: "public" });
         urls.push(blob.url);
       }
     } else {
-      // Local fallback (useful for development)
+      // Option 3: Local fallback (default for local development)
       const uploadsDir = path.join(process.cwd(), "uploads");
       if (!fs.existsSync(uploadsDir)) {
         fs.mkdirSync(uploadsDir, { recursive: true });
@@ -40,11 +77,9 @@ export async function POST(request: Request) {
         const filename = `${unique}${ext}`;
         const filePath = path.join(uploadsDir, filename);
 
-        // Convert file stream to buffer
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Save to disk
         fs.writeFileSync(filePath, buffer);
         urls.push(`${baseUrl}/uploads/${filename}`);
       }
