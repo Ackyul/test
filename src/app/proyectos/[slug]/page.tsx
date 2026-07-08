@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, MapPin, BedDouble, Maximize2, Tag } from "lucide-react";
 import DynamicDistance from "@/components/DynamicDistance";
 import ProjectMap from "@/components/ProjectMap";
-import { API_URL } from "@/lib/api";
+import { prisma } from "@/lib/prisma";
 
 interface ProjectData {
   id: number;
@@ -36,12 +36,29 @@ function isActive(status: string): boolean {
 
 async function getProject(slug: string): Promise<ProjectData | null> {
   try {
-    const res = await fetch(`${API_URL}/api/projects/${slug}`, {
-      cache: "no-store",
+    const project = await prisma.project.findUnique({
+      where: { slug },
     });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
+    
+    if (!project) return null;
+
+    // Convert potential nulls to undefined or match interface
+    return {
+      id: project.id,
+      slug: project.slug,
+      title: project.title,
+      description: project.description,
+      lat: project.lat,
+      lng: project.lng,
+      videoUrl: project.videoUrl || undefined,
+      images: project.images,
+      status: project.status,
+      priceRange: project.priceRange || undefined,
+      bedrooms: project.bedrooms || undefined,
+      area: project.area || undefined,
+    };
+  } catch (error) {
+    console.error("Error fetching project in server component:", error);
     return null;
   }
 }

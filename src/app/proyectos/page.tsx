@@ -1,7 +1,7 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import ProjectsClientView from "@/components/ProjectsClientView";
-import { API_URL } from "@/lib/api";
+import { prisma } from "@/lib/prisma";
 
 interface ProjectData {
   id: number;
@@ -17,12 +17,23 @@ interface ProjectData {
 
 async function getProjects(): Promise<ProjectData[]> {
   try {
-    const res = await fetch(`${API_URL}/api/projects`, {
-      cache: 'no-store'
+    const projects = await prisma.project.findMany({
+      orderBy: { createdAt: "desc" },
     });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
+    
+    return projects.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      description: p.description,
+      images: p.images,
+      status: p.status,
+      priceRange: p.priceRange || undefined,
+      bedrooms: p.bedrooms || undefined,
+      area: p.area || undefined,
+    }));
+  } catch (error) {
+    console.error("Error fetching projects in server component:", error);
     return [];
   }
 }
