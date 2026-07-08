@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import ProjectsClientView from "@/components/ProjectsClientView";
 import { prisma } from "@/lib/prisma";
+import Footer from "@/components/Footer";
 
 interface ProjectData {
   id: number;
@@ -40,5 +41,10 @@ async function getProjects(): Promise<ProjectData[]> {
 
 export default async function ProyectosPage() {
   const projects = await getProjects();
-  return <ProjectsClientView initialProjects={projects} />;
+  return (
+    <>
+      <ProjectsClientView initialProjects={projects} />
+      <Footer />
+    </>
+  );
 }

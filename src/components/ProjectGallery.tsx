@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { API_URL } from "@/lib/api";
+import Footer from "@/components/Footer";
 
 interface Project {
   id: number;
@@ -132,6 +133,9 @@ export default function ProjectGallery() {
           </Link>
         </div>
       )}
+      <div className="relative z-[100] bg-white">
+        <Footer />
+      </div>
     </div>
   );
 }

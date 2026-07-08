@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { siteConfig } from "@/siteConfig";
 import { API_URL } from "@/lib/api";
+import Footer from "@/components/Footer";
 
 const defaults = {
   contact_phone:           "",
@@ -28,7 +29,8 @@ export default function Contacto() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-stone-900 text-stone-50 flex flex-col items-center justify-center px-6 pt-24 pb-16">
+    <>
+      <div className="min-h-screen bg-stone-900 text-stone-50 flex flex-col items-center justify-center px-6 pt-24 pb-16">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -114,5 +116,7 @@ export default function Contacto() {
         </div>
       </motion.div>
     </div>
-  );
+    <Footer />
+  </>
+);
 }
