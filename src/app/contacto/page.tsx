@@ -7,10 +7,10 @@ import { siteConfig } from "@/siteConfig";
 import { API_URL } from "@/lib/api";
 
 const defaults = {
-  contact_phone:           siteConfig.contact.phone,
-  contact_email:           siteConfig.contact.email,
-  contact_address_line1:   siteConfig.contact.addressLine1,
-  contact_address_line2:   siteConfig.contact.addressLine2,
+  contact_phone:           "",
+  contact_email:           "",
+  contact_address_line1:   "",
+  contact_address_line2:   "",
 };
 
 export default function Contacto() {

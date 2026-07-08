@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { API_URL } from "@/lib/api";
@@ -19,6 +19,14 @@ interface Project {
 export default function ProjectGallery() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFeaturedTitle, setShowFeaturedTitle] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowFeaturedTitle(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     fetch(`${API_URL}/api/projects`)
@@ -39,7 +47,7 @@ export default function ProjectGallery() {
   }, []);
 
   return (
-    <div className="w-full relative h-[100dvh] overflow-y-auto overflow-x-hidden snap-y snap-mandatory scroll-smooth">
+    <div className="w-full relative h-[100dvh] overflow-y-auto overflow-x-hidden snap-y snap-proximity scroll-smooth">
       {loading ? (
         <div className="h-screen flex items-center justify-center text-stone-500 bg-stone-900 relative z-10">
           Cargando catálogo...
@@ -55,18 +63,21 @@ export default function ProjectGallery() {
               <div className="block w-full h-full relative group overflow-hidden">
                 <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
 
-                {index === 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center z-[15] pointer-events-none">
-                    <motion.h1
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                      className="text-white/90 text-5xl md:text-8xl font-light tracking-tighter drop-shadow-lg text-center px-6"
-                    >
-                      Proyectos destacados.
-                    </motion.h1>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {showFeaturedTitle && index === 0 && (
+                    <div className="absolute inset-0 flex items-center justify-center z-[15] pointer-events-none">
+                      <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                        className="text-white/90 text-5xl md:text-8xl font-light tracking-tighter drop-shadow-lg text-center px-6"
+                      >
+                        Proyectos destacados.
+                      </motion.h1>
+                    </div>
+                  )}
+                </AnimatePresence>
 
                 <Image
                   src={project.images?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9"}

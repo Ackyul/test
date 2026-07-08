@@ -5,11 +5,11 @@ import { siteConfig } from "@/siteConfig";
 import { API_URL } from "@/lib/api";
 
 const defaults = {
-  footer_copyright:        siteConfig.copyright,
-  contact_phone:           siteConfig.contact.phone,
-  contact_email:           siteConfig.contact.email,
-  contact_address_line1:   siteConfig.contact.addressLine1,
-  contact_address_line2:   siteConfig.contact.addressLine2,
+  footer_copyright:        "",
+  contact_phone:           "",
+  contact_email:           "",
+  contact_address_line1:   "",
+  contact_address_line2:   "",
   social_instagram:        "",
   social_facebook:         "",
 };
@@ -27,6 +27,9 @@ export default function Footer() {
       })
       .catch(() => {});
   }, []);
+
+  const hasData = Object.values(data).some((val) => val !== "");
+  if (!hasData) return null;
 
   return (
     <footer className="w-full bg-[#FAFAFA] border-t border-stone-200 py-10 px-6 md:px-12 text-stone-500 font-light text-xs tracking-wide">
